@@ -172,10 +172,10 @@ export default function CadastrarContato() {
                   {/* Botões de Ação */}
                   <div className="flex gap-1">
                     <button onClick={() => prepararEdicao(leitor)} className="p-2 text-zinc-400 hover:text-blue-600 bg-white rounded-lg shadow-sm border border-zinc-200 transition-colors" title="Editar">
-                      ✏️Editar
+                      ✏️
                     </button>
                     <button onClick={() => apagarLeitor(leitor.id)} className="p-2 text-zinc-400 hover:text-red-600 bg-white rounded-lg shadow-sm border border-zinc-200 transition-colors" title="Apagar">
-                      🗑️Apagar
+                      🗑️
                     </button>
                   </div>
                 </li>
