@@ -29,7 +29,7 @@ export default function RegistarEmprestimo() {
 
   const salvarEmprestimo = async () => {
     if (!livroSelecionado || !contatoSelecionado) {
-      setErro("Por favor, seleciona o livro e a pessoa para quem vais emprestar.");
+      setErro("Por favor, selecione o livro e a pessoa para quem vai emprestar.");
       return;
     }
 
@@ -50,7 +50,7 @@ export default function RegistarEmprestimo() {
       setBuscaLivro(""); 
       
     } catch (error: any) {
-      setErro("Erro ao registar: " + error.message);
+      setErro("Erro ao registrar: " + error.message);
     } finally {
       setLoading(false);
     }
@@ -70,8 +70,8 @@ export default function RegistarEmprestimo() {
           <Link href="/" className="text-[#007AFF] text-[15px] hover:underline mb-4 inline-block">
             ← Voltar à Estante
           </Link>
-          <h1 className="text-2xl font-semibold text-black tracking-tight">Registar Empréstimo</h1>
-          <p className="text-[14px] text-zinc-500 mt-1">Nunca mais percas o rasto aos teus livros favoritos.</p>
+          <h1 className="text-2xl font-semibold text-black tracking-tight">Registrar Empréstimo</h1>
+          <p className="text-[14px] text-zinc-500 mt-1">Nunca mais perca o controle dos seus livros.</p>
         </header>
 
         <form className="bg-white rounded-2xl p-5 shadow-sm border border-zinc-100 space-y-4">

@@ -86,7 +86,7 @@ export default function CadastrarLocalizacao() {
   };
 
   const apagarLocalizacao = async (id: string) => {
-    if (!confirm("Tens a certeza que queres apagar esta estante?")) return;
+    if (!confirm("Tem certeza que quer apagar esta estante?")) return;
     
     setErro("");
     setSucesso("");

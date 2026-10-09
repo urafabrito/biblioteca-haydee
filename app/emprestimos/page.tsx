@@ -88,11 +88,11 @@ export default function PainelEmprestimos() {
         </header>
 
         {loading ? (
-          <p className="text-center text-zinc-400 text-sm mt-10">A carregar registos...</p>
+          <p className="text-center text-zinc-400 text-sm mt-10">Carregando registros...</p>
         ) : emprestimos.length === 0 ? (
           <div className="bg-white rounded-2xl p-8 border border-zinc-100 text-center shadow-sm">
             <p className="text-[14px] text-zinc-500 font-medium mb-1">Nenhum livro emprestado.</p>
-            <p className="text-[12px] text-zinc-400">O teu acervo está todo em casa!</p>
+            <p className="text-[12px] text-zinc-400">O seu acervo está todo em casa!</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -112,7 +112,7 @@ export default function PainelEmprestimos() {
                   {devolvendoId === emp.id ? (
                     <div className="mt-4 pt-4 border-t border-orange-100/50 space-y-3">
                       <label className="text-[13px] font-medium text-zinc-600 block">
-                        Onde vais guardar o livro agora?
+                        Onde vai guardar o livro agora?
                       </label>
                       <select 
                         value={novaLocalizacao}

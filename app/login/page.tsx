@@ -22,7 +22,7 @@ export default function Login() {
     });
 
     if (error) {
-      setErro("Acesso negado. Verifica o e-mail e a senha.");
+      setErro("Acesso negado. Verifique o e-mail e a senha.");
       setLoading(false);
     } else {
       router.push("/"); // Se a senha estiver certa, entra na estante!
@@ -51,7 +51,7 @@ export default function Login() {
           </div>
 
           <button type="submit" disabled={loading} className="w-full bg-black text-white hover:bg-zinc-800 rounded-xl h-12 text-base font-medium transition-colors mt-2 shadow-md disabled:opacity-50">
-            {loading ? "A entrar..." : "Entrar"}
+            {loading ? "Entrando" : "Entrar"}
           </button>
         </form>
       </div>

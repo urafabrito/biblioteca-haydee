@@ -42,7 +42,7 @@ export default function Home() {
           {/* Título e Subtítulo - Com flex-1 para empurrar o botão para a direita */}
           <div className="flex-1">
             <h1 className="text-3xl font-bold text-black tracking-tight mb-1">Biblioteca Haydee</h1>
-            <p className="text-[15px] text-zinc-500">O teu acervo na palma da mão.</p>
+            <p className="text-[15px] text-zinc-500">O Seu acervo na palma da mão.</p>
           </div>
           
           {/* Botão de Logout */}
@@ -83,18 +83,18 @@ export default function Home() {
         </div>
 
         <div className="flex items-center justify-between mt-8 mb-4">
-          <h2 className="text-[16px] font-semibold text-black">O teu Acervo</h2>
+          <h2 className="text-[16px] font-semibold text-black">O Seu Acervo</h2>
           <span className="bg-zinc-200/50 text-zinc-500 px-2.5 py-1 rounded-full text-[12px] font-semibold">
             {livrosFiltrados.length} {livrosFiltrados.length === 1 ? 'livro' : 'livros'}
           </span>
         </div>
 
         {loading ? (
-          <p className="text-center text-zinc-400 text-sm py-10">A carregar estante...</p>
+          <p className="text-center text-zinc-400 text-sm py-10">Carregando estante...</p>
         ) : livrosFiltrados.length === 0 ? (
           <div className="bg-white text-center rounded-2xl p-8 border border-zinc-100 shadow-sm">
             <p className="text-zinc-500 text-[14px] font-medium">Nenhum livro encontrado.</p>
-            {busca === "" && <p className="text-zinc-400 text-[12px] mt-1">Clica em "Novo Livro" para começar.</p>}
+            {busca === "" && <p className="text-zinc-400 text-[12px] mt-1">Clique em "Novo Livro" para começar.</p>}
           </div>
         ) : (
           <div className="grid grid-cols-3 gap-3">

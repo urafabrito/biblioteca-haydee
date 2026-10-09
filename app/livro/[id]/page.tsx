@@ -78,11 +78,11 @@ export default function DetalhesLivro() {
   };
 
   const apagarLivro = async () => {
-    if (!confirm("🚨 Tens a certeza que queres APAGAR este livro do acervo definitivamente?")) return;
+    if (!confirm("🚨 Tem certeza que quer APAGAR este livro do acervo definitivamente?")) return;
 
     // 🔒 TRAVA DE SEGURANÇA: Verificar se está emprestado
     if (livro.emprestimos && livro.emprestimos.length > 0) {
-      alert("❌ Bloqueado: Este livro está emprestado! Regista a devolução antes de o apagar do acervo.");
+      alert("❌ Bloqueado: Este livro está emprestado! Registre a devolução antes de o apagar do acervo.");
       return;
     }
 

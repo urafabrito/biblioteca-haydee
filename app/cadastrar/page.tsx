@@ -52,7 +52,7 @@ export default function CadastrarLivro() {
         ano: data.year ? data.year.toString() : "",
       });
     } catch (error) {
-      setErro("Livro não encontrado. Podes preencher os dados (e a capa) manualmente.");
+      setErro("Livro não encontrado. Pode preencher os dados (e a capa) manualmente.");
     } finally {
       setLoadingBusca(false);
     }

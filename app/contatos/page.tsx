@@ -82,7 +82,7 @@ export default function CadastrarContato() {
   };
 
   const apagarLeitor = async (id: string) => {
-    if (!confirm("Tens a certeza que queres apagar este leitor?")) return;
+    if (!confirm("Tem certeza que quer apagar este leitor?")) return;
     
     setErro("");
     setSucesso("");
@@ -153,9 +153,9 @@ export default function CadastrarContato() {
         </form>
 
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-zinc-100">
-          <h2 className="text-[14px] font-bold text-zinc-800 mb-4 border-b border-zinc-100 pb-2">Leitores Registados</h2>
+          <h2 className="text-[14px] font-bold text-zinc-800 mb-4 border-b border-zinc-100 pb-2">Leitores Registrados</h2>
           {leitoresAtuais.length === 0 ? (
-            <p className="text-[13px] text-zinc-400 text-center py-4">Nenhum leitor registado.</p>
+            <p className="text-[13px] text-zinc-400 text-center py-4">Nenhum leitor registrado.</p>
           ) : (
             <ul className="space-y-3">
               {leitoresAtuais.map((leitor) => (
