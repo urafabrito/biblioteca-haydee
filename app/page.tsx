@@ -37,20 +37,21 @@ export default function Home() {
     <main className="min-h-screen bg-[#F2F2F7] p-6 pb-20">
       <div className="max-w-md mx-auto space-y-6">
         
-        {/* HEADER ATUALIZADO COM BOTÃO DE LOGOUT */}
-        <header className="pt-8 relative flex items-center justify-center">
-          <div className="text-center">
+        {/* HEADER ATUALIZADO COM BOTÃO DE LOGOUT ALINHADO */}
+        <header className="pt-8 flex items-start justify-between gap-2">
+          {/* Título e Subtítulo - Com flex-1 para empurrar o botão para a direita */}
+          <div className="flex-1">
             <h1 className="text-3xl font-bold text-black tracking-tight mb-1">Biblioteca Haydee</h1>
             <p className="text-[15px] text-zinc-500">O teu acervo na palma da mão.</p>
           </div>
           
-          {/* Botão de Logout no canto direito */}
+          {/* Botão de Logout */}
           <button 
             onClick={fazerLogout}
-            className="absolute right-0 top-10 bg-white border border-zinc-200 text-zinc-600 hover:bg-red-50 hover:text-red-600 hover:border-red-200 p-2 rounded-full shadow-sm transition-all"
+            className="flex-shrink-0 bg-white border border-zinc-200 text-zinc-600 hover:bg-red-50 hover:text-red-600 hover:border-red-200 p-2 rounded-full shadow-sm transition-all"
             title="Sair do sistema"
           >
-            <span className="text-lg leading-none">Sair</span>
+            <span className="text-sm font-medium leading-none px-2">Sair</span>
           </button>
         </header>
 
@@ -72,13 +73,12 @@ export default function Home() {
 
         {/* Barra de Pesquisa */}
         <div className="relative pt-2">
-          <span className="absolute left-4 top-[26px] text-zinc-400"></span>
           <input 
             type="text" 
             placeholder="Pesquisar por título ou autor..." 
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
-            className="w-full bg-white rounded-xl h-12 pl-4 pr-4 text-[14px] outline-none shadow-sm border border-zinc-200 focus:border-black focus:ring-1 focus:ring-black transition-all"
+            className="w-full bg-white rounded-xl h-12 px-4 text-[14px] outline-none shadow-sm border border-zinc-200 focus:border-black focus:ring-1 focus:ring-black transition-all"
           />
         </div>
 

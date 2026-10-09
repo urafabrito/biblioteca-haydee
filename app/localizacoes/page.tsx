@@ -170,21 +170,21 @@ export default function CadastrarLocalizacao() {
           ) : (
             <ul className="space-y-3">
               {locaisAtuais.map((local) => (
-                <li key={local.id} className="bg-[#F2F2F7] p-3 rounded-xl flex items-center justify-between gap-3 group">
+                <li key={local.id} className="bg-[#F2F2F7] p-3 rounded-xl flex items-center justify-between gap-3 group overflow-hidden">
                   
-                  {/* Informações da Estante (Com Emoji de Alfinete) */}
-                  <div className="flex items-center gap-3">
-                    <div className="bg-white w-10 h-10 rounded-full flex items-center justify-center shadow-sm border border-zinc-200">
+                  {/* Informações da Estante (Com Emoji de Alfinete e truncate) */}
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div className="bg-white w-10 h-10 flex-shrink-0 rounded-full flex items-center justify-center shadow-sm border border-zinc-200">
                       <span className="text-lg">📍</span>
                     </div>
-                    <div>
-                      <h4 className="text-[14px] font-bold text-gray-900 leading-tight">{local.comodo}</h4>
-                      <p className="text-[12px] text-zinc-500 mt-0.5">{local.movel} • {local.prateleira}</p>
+                    <div className="min-w-0 flex-1">
+                      <h4 className="text-[14px] font-bold text-gray-900 leading-tight truncate">{local.comodo}</h4>
+                      <p className="text-[12px] text-zinc-500 mt-0.5 truncate">{local.movel} • {local.prateleira}</p>
                     </div>
                   </div>
 
-                  {/* Botões de Ação Padronizados */}
-                  <div className="flex items-center gap-2">
+                  {/* Botões de Ação Padronizados e com flex-shrink-0 */}
+                  <div className="flex items-center gap-2 flex-shrink-0">
                     <button 
                       onClick={() => prepararEdicao(local)} 
                       className="w-20 py-1 text-xs font-medium text-gray-500 bg-transparent border border-gray-200 rounded-md hover:bg-gray-100 hover:text-gray-800 transition-colors text-center"

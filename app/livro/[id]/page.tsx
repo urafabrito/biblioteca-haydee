@@ -145,10 +145,10 @@ export default function DetalhesLivro() {
           {!editando && (
             <div className="flex gap-2">
               <button onClick={() => setEditando(true)} className="bg-white text-zinc-600 px-3 py-1.5 rounded-lg text-[13px] font-medium shadow-sm border border-zinc-200 hover:bg-zinc-50 transition-colors">
-                ✏️ Editar
+                Editar
               </button>
               <button onClick={apagarLivro} className="bg-white text-red-600 px-3 py-1.5 rounded-lg text-[13px] font-medium shadow-sm border border-zinc-200 hover:bg-red-50 transition-colors">
-                🗑️ Apagar
+                Apagar
               </button>
             </div>
           )}
