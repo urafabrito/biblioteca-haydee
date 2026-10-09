@@ -124,7 +124,7 @@ export default function CadastrarContato() {
 
         <form className={`bg-white rounded-2xl p-5 shadow-sm border ${editandoId ? 'border-blue-400 shadow-blue-100' : 'border-zinc-100'} space-y-4 transition-all`}>
           <h2 className="text-[14px] font-bold text-zinc-800 mb-2 border-b border-zinc-100 pb-2">
-            {editandoId ? "✏️ A Editar Leitor" : "Adicionar Novo Leitor"}
+            {editandoId ? "Editando Leitor" : "Adicionar Novo Leitor"}
           </h2>
 
           {sucesso && <div className="bg-green-50 text-green-700 p-3 rounded-lg text-[13px] font-medium text-center border border-green-100">{sucesso}</div>}
@@ -169,13 +169,19 @@ export default function CadastrarContato() {
                       <p className="text-[12px] text-zinc-500 mt-0.5">{leitor.telefone || "Sem telefone"}</p>
                     </div>
                   </div>
-                  {/* Botões de Ação */}
-                  <div className="flex gap-1">
-                    <button onClick={() => prepararEdicao(leitor)} className="p-2 text-zinc-400 hover:text-blue-600 bg-white rounded-lg shadow-sm border border-zinc-200 transition-colors" title="Editar">
-                      ✏️
+                  {/* Botões de Ação Padronizados */}
+                  <div className="flex items-center gap-2">
+                    <button 
+                      onClick={() => prepararEdicao(leitor)} 
+                      className="w-20 py-1 text-xs font-medium text-gray-500 bg-transparent border border-gray-200 rounded-md hover:bg-gray-100 hover:text-gray-800 transition-colors text-center"
+                    >
+                      Editar
                     </button>
-                    <button onClick={() => apagarLeitor(leitor.id)} className="p-2 text-zinc-400 hover:text-red-600 bg-white rounded-lg shadow-sm border border-zinc-200 transition-colors" title="Apagar">
-                      🗑️
+                    <button 
+                      onClick={() => apagarLeitor(leitor.id)} 
+                      className="w-20 py-1 text-xs font-medium text-red-400 bg-transparent border border-gray-200 rounded-md hover:bg-red-50 hover:text-red-600 transition-colors text-center"
+                    >
+                      Apagar
                     </button>
                   </div>
                 </li>

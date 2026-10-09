@@ -88,13 +88,13 @@ export default function RegistarEmprestimo() {
             <label className="text-[13px] font-medium text-zinc-500 ml-1">Qual livro vais emprestar?</label>
             
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 text-[12px]">🔍</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 text-[12px]"></span>
               <input 
                 type="text" 
                 placeholder="Pesquisar livro ou autor..." 
                 value={buscaLivro}
                 onChange={(e) => setBuscaLivro(e.target.value)}
-                className="w-full bg-white rounded-xl h-10 pl-8 pr-3 text-[13px] outline-none border border-zinc-200 focus:border-black transition-all mb-2 shadow-sm"
+                className="w-full bg-white rounded-xl h-10 pl-4 pr-3 text-[13px] outline-none border border-zinc-200 focus:border-black transition-all mb-2 shadow-sm"
               />
             </div>
 

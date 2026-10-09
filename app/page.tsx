@@ -63,22 +63,22 @@ export default function Home() {
             Empréstimos
           </Link>
           <Link href="/localizacoes" className="bg-[#F2F2F7] hover:bg-zinc-200 text-zinc-700 rounded-xl h-10 text-[13px] font-medium transition-colors flex items-center justify-center gap-2">
-            📍 Estantes
+            Estantes
           </Link>
           <Link href="/contatos" className="bg-[#F2F2F7] hover:bg-zinc-200 text-zinc-700 rounded-xl h-10 text-[13px] font-medium transition-colors flex items-center justify-center gap-2">
-            👥 Leitores
+            Leitores
           </Link>
         </div>
 
         {/* Barra de Pesquisa */}
         <div className="relative pt-2">
-          <span className="absolute left-4 top-[26px] text-zinc-400">🔍</span>
+          <span className="absolute left-4 top-[26px] text-zinc-400"></span>
           <input 
             type="text" 
             placeholder="Pesquisar por título ou autor..." 
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
-            className="w-full bg-white rounded-xl h-12 pl-11 pr-4 text-[14px] outline-none shadow-sm border border-zinc-200 focus:border-black focus:ring-1 focus:ring-black transition-all"
+            className="w-full bg-white rounded-xl h-12 pl-4 pr-4 text-[14px] outline-none shadow-sm border border-zinc-200 focus:border-black focus:ring-1 focus:ring-black transition-all"
           />
         </div>
 

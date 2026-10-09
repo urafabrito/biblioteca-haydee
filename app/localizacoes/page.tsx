@@ -27,7 +27,7 @@ export default function CadastrarLocalizacao() {
 
   const salvarLocalizacao = async () => {
     if (!comodo || !movel || !prateleira) {
-      setErro("Por favor, preenche todos os campos.");
+      setErro("Por favor, preencha todos os campos.");
       return;
     }
 
@@ -129,7 +129,7 @@ export default function CadastrarLocalizacao() {
         {/* Formulário Inteligente (Criação/Edição) */}
         <form className={`bg-white rounded-2xl p-5 shadow-sm border ${editandoId ? 'border-blue-400 shadow-blue-100' : 'border-zinc-100'} space-y-4 transition-all`}>
           <h2 className="text-[14px] font-bold text-zinc-800 mb-2 border-b border-zinc-100 pb-2">
-            {editandoId ? "✏️ A Editar Estante" : "Adicionar Novo Local"}
+            {editandoId ? "Editando Estante" : "Adicionar Novo Local"}
           </h2>
 
           {sucesso && <div className="bg-green-50 text-green-700 p-3 rounded-lg text-[13px] font-medium text-center border border-green-100">{sucesso}</div>}
@@ -171,22 +171,34 @@ export default function CadastrarLocalizacao() {
             <ul className="space-y-3">
               {locaisAtuais.map((local) => (
                 <li key={local.id} className="bg-[#F2F2F7] p-3 rounded-xl flex items-center justify-between gap-3 group">
+                  
+                  {/* Informações da Estante (Com Emoji de Alfinete) */}
                   <div className="flex items-center gap-3">
-                    <span className="text-xl">📍</span>
+                    <div className="bg-white w-10 h-10 rounded-full flex items-center justify-center shadow-sm border border-zinc-200">
+                      <span className="text-lg">📍</span>
+                    </div>
                     <div>
-                      <p className="text-[14px] font-bold text-black leading-tight">{local.comodo}</p>
+                      <h4 className="text-[14px] font-bold text-gray-900 leading-tight">{local.comodo}</h4>
                       <p className="text-[12px] text-zinc-500 mt-0.5">{local.movel} • {local.prateleira}</p>
                     </div>
                   </div>
-                  {/* Botões de Ação */}
-                  <div className="flex gap-1">
-                    <button onClick={() => prepararEdicao(local)} className="p-2 text-zinc-400 hover:text-blue-600 bg-white rounded-lg shadow-sm border border-zinc-200 transition-colors" title="Editar">
-                      ✏️
+
+                  {/* Botões de Ação Padronizados */}
+                  <div className="flex items-center gap-2">
+                    <button 
+                      onClick={() => prepararEdicao(local)} 
+                      className="w-20 py-1 text-xs font-medium text-gray-500 bg-transparent border border-gray-200 rounded-md hover:bg-gray-100 hover:text-gray-800 transition-colors text-center"
+                    >
+                      Editar
                     </button>
-                    <button onClick={() => apagarLocalizacao(local.id)} className="p-2 text-zinc-400 hover:text-red-600 bg-white rounded-lg shadow-sm border border-zinc-200 transition-colors" title="Apagar">
-                      🗑️
+                    <button 
+                      onClick={() => apagarLocalizacao(local.id)} 
+                      className="w-20 py-1 text-xs font-medium text-red-400 bg-transparent border border-gray-200 rounded-md hover:bg-red-50 hover:text-red-600 transition-colors text-center"
+                    >
+                      Apagar
                     </button>
                   </div>
+                  
                 </li>
               ))}
             </ul>
