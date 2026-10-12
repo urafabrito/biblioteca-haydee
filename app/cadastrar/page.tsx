@@ -6,7 +6,8 @@ import { supabase } from "@/lib/supabase";
 import imageCompression from "browser-image-compression";
 
 export default function CadastrarLivro() {
-  const [isbn, setIsbn] = useState("");
+  const [termoBusca, setTermoBusca] = useState(""); 
+  const [resultadosBusca, setResultadosBusca] = useState<any[]>([]);
   const [loadingBusca, setLoadingBusca] = useState(false);
   const [loadingSalvar, setLoadingSalvar] = useState(false);
   const [uploadingFoto, setUploadingFoto] = useState(false);
@@ -32,42 +33,181 @@ export default function CadastrarLivro() {
   }, []);
 
   const buscarLivro = async () => {
-    if (!isbn) return;
+    if (!termoBusca) return;
+    
     setLoadingBusca(true);
     setErro("");
     setSucesso(false);
-    
-    try {
-      const cleanIsbn = isbn.replace(/-/g, "");
-      const res = await fetch(`https://brasilapi.com.br/api/isbn/v1/${cleanIsbn}`);
-      
-      if (!res.ok) throw new Error("Não encontrado");
-      
-      const data = await res.json();
+    setResultadosBusca([]);
 
-      setLivro({
-        titulo: data.title || "",
-        autor: data.authors ? data.authors.join(", ") : "",
-        capa_url: data.cover_url || "", 
-        ano: data.year ? data.year.toString() : "",
-      });
-    } catch (error) {
-      setErro("Livro não encontrado. Pode preencher os dados (e a capa) manualmente.");
-    } finally {
-      setLoadingBusca(false);
+    // Puxa a chave de API das variáveis de ambiente
+    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_BOOKS_API_KEY;
+
+    // Deteção robusta para saber se é ISBN (só números e traços, 10 ou 13 caracteres)
+    const termoLimpo = termoBusca.replace(/[-\s]/g, ""); 
+    const eIsbn = /^(978|979)?\d{9}[\dX]$/i.test(termoLimpo);
+
+    if (eIsbn) {
+      // ==========================================
+      // LÓGICA 1: BUSCA POR ISBN EM CASCATA
+      // ==========================================
+      const isbnLimpo = termoLimpo;
+      let dadosEncontrados = { titulo: "", autor: "", capa_url: "", ano: "" };
+
+      const faltamDados = () => {
+          return !dadosEncontrados.titulo || !dadosEncontrados.autor || !dadosEncontrados.capa_url || !dadosEncontrados.ano;
+      };
+
+      try {
+          try {
+              const resBrasil = await fetch(`https://brasilapi.com.br/api/isbn/v1/${isbnLimpo}`);
+              if (resBrasil.ok) {
+                  const dataBrasil = await resBrasil.json();
+                  dadosEncontrados.titulo = dataBrasil.title || "";
+                  dadosEncontrados.autor = dataBrasil.authors ? dataBrasil.authors.join(", ") : "";
+                  dadosEncontrados.capa_url = dataBrasil.cover_url || "";
+                  dadosEncontrados.ano = dataBrasil.year ? dataBrasil.year.toString() : "";
+              }
+          } catch (e) { console.log("Falha na Brasil API..."); }
+
+          if (faltamDados()) {
+              try {
+                  // 🔥 Adicionada a API KEY na URL do Google
+                  const resGoogle = await fetch(`https://www.googleapis.com/books/v1/volumes?q=isbn:${isbnLimpo}&key=${apiKey}`);
+                  if (resGoogle.ok) {
+                      const dataGoogle = await resGoogle.json();
+                      if (dataGoogle.items && dataGoogle.items.length > 0) {
+                          const info = dataGoogle.items[0].volumeInfo;
+                          if (!dadosEncontrados.titulo) dadosEncontrados.titulo = info.title || "";
+                          if (!dadosEncontrados.autor) dadosEncontrados.autor = info.authors ? info.authors.join(", ") : "";
+                          if (!dadosEncontrados.capa_url && info.imageLinks) {
+                              let url = info.imageLinks.thumbnail || info.imageLinks.smallThumbnail || "";
+                              dadosEncontrados.capa_url = url.replace("http:", "https:");
+                          }
+                          if (!dadosEncontrados.ano && info.publishedDate) {
+                              dadosEncontrados.ano = info.publishedDate.substring(0, 4);
+                          }
+                      }
+                  }
+              } catch (e) { console.log("Falha na Google Books..."); }
+          }
+
+          if (faltamDados()) {
+              try {
+                  const resOpen = await fetch(`https://openlibrary.org/api/books?bibkeys=ISBN:${isbnLimpo}&format=json&jscmd=data`);
+                  if (resOpen.ok) {
+                      const dataOpen = await resOpen.json();
+                      const bookData = dataOpen[`ISBN:${isbnLimpo}`];
+                      if (bookData) {
+                          if (!dadosEncontrados.titulo) dadosEncontrados.titulo = bookData.title || "";
+                          if (!dadosEncontrados.autor) dadosEncontrados.autor = bookData.authors ? bookData.authors.map((a:any) => a.name).join(", ") : "";
+                          if (!dadosEncontrados.capa_url && bookData.cover) dadosEncontrados.capa_url = bookData.cover.large || bookData.cover.medium || "";
+                          if (!dadosEncontrados.ano && bookData.publish_date) {
+                              const anoMatch = bookData.publish_date.match(/\d{4}/);
+                              if (anoMatch) dadosEncontrados.ano = anoMatch[0];
+                          }
+                      }
+                  }
+              } catch (e) { console.log("Falha na Open Library."); }
+          }
+
+          if ((!dadosEncontrados.capa_url || !dadosEncontrados.ano || !dadosEncontrados.autor) && dadosEncontrados.titulo) {
+              try {
+                  const queryTitulo = encodeURIComponent(dadosEncontrados.titulo);
+                  let queryStr = `intitle:${queryTitulo}`;
+                  if (dadosEncontrados.autor) {
+                      queryStr += `+inauthor:${encodeURIComponent(dadosEncontrados.autor)}`;
+                  }
+                  // 🔥 Adicionada a API KEY na URL do Google
+                  const resExtra = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${queryStr}&key=${apiKey}`);
+                  if (resExtra.ok) {
+                      const dataExtra = await resExtra.json();
+                      if (dataExtra.items && dataExtra.items.length > 0) {
+                          const info = dataExtra.items[0].volumeInfo;
+                          if (!dadosEncontrados.autor && info.authors) dadosEncontrados.autor = info.authors.join(", ");
+                          if (!dadosEncontrados.capa_url && info.imageLinks) {
+                              let url = info.imageLinks.thumbnail || info.imageLinks.smallThumbnail || "";
+                              dadosEncontrados.capa_url = url.replace("http:", "https:");
+                          }
+                          if (!dadosEncontrados.ano && info.publishedDate) dadosEncontrados.ano = info.publishedDate.substring(0, 4);
+                      }
+                  }
+              } catch (e) { console.log("Falha na busca extra pelo Título."); }
+          }
+
+          if (dadosEncontrados.titulo) {
+              setLivro(dadosEncontrados);
+          } else {
+              setErro("ISBN não encontrado em nenhuma base. Podes preencher manualmente.");
+          }
+
+      } catch (error) {
+          setErro("Ocorreu um erro ao buscar o ISBN.");
+      }
+    } else {
+      // ==========================================
+      // LÓGICA 2: BUSCA POR NOME (Retorna Lista)
+      // ==========================================
+      try {
+        const query = encodeURIComponent(termoBusca);
+        // 🔥 Adicionada a API KEY na URL do Google
+        const res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=15&key=${apiKey}`);
+        
+        if (!res.ok) {
+            setErro("Erro ao comunicar com a base de dados do Google.");
+            setLoadingBusca(false);
+            return;
+        }
+
+        const data = await res.json();
+        
+        if (data.items && data.items.length > 0) {
+          const edicoesFormatadas = data.items.map((item: any) => {
+            const info = item.volumeInfo;
+            let capa = "";
+            if (info.imageLinks) {
+                capa = info.imageLinks.thumbnail || info.imageLinks.smallThumbnail || "";
+                capa = capa.replace("http:", "https:");
+            }
+            return {
+              id: item.id,
+              titulo: info.title || "",
+              autor: info.authors ? info.authors.join(", ") : "",
+              capa_url: capa,
+              ano: info.publishedDate ? info.publishedDate.substring(0, 4) : ""
+            };
+          });
+          setResultadosBusca(edicoesFormatadas);
+        } else {
+          setErro("Nenhum livro encontrado com esse nome.");
+        }
+      } catch (error) {
+        setErro("Erro ao buscar pelo nome. Tenta novamente.");
+      }
     }
+    
+    setLoadingBusca(false);
   };
 
-  // 🔥 NOVA FUNÇÃO: Compressão e Upload da Imagem
+  const selecionarEdicao = (livroSelecionado: any) => {
+    setLivro({
+      titulo: livroSelecionado.titulo,
+      autor: livroSelecionado.autor,
+      capa_url: livroSelecionado.capa_url,
+      ano: livroSelecionado.ano
+    });
+    setResultadosBusca([]); 
+    setErro("");
+  };
+
   const fazerUploadCapa = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // 🚨 TRAVA DE SEGURANÇA: Bloqueia ficheiros maiores que 10MB antes da compressão
     const tamanhoEmMB = file.size / 1024 / 1024;
     if (tamanhoEmMB > 10) {
       setErro("A imagem é muito pesada (máx: 10MB). Tira uma foto normal ou escolhe outra mais leve.");
-      e.target.value = ""; // Limpa o seletor
+      e.target.value = ""; 
       return;
     }
 
@@ -75,7 +215,6 @@ export default function CadastrarLivro() {
       setUploadingFoto(true);
       setErro("");
 
-      // 1. Comprimir a imagem (Reduz para máximo 200KB e 800px de altura/largura)
       const options = {
         maxSizeMB: 0.2,
         maxWidthOrHeight: 800,
@@ -83,28 +222,23 @@ export default function CadastrarLivro() {
       };
       const compressedFile = await imageCompression(file, options);
 
-      // 2. Criar um nome único para o ficheiro para não haver sobreposições
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
 
-      // 3. Enviar para o Supabase Storage (no bucket 'capas')
       const { error: uploadError } = await supabase.storage
         .from('capas')
         .upload(fileName, compressedFile);
 
       if (uploadError) throw uploadError;
 
-      // 4. Obter o Link Público da imagem que acabou de ser guardada
       const { data } = supabase.storage.from('capas').getPublicUrl(fileName);
 
-      // 5. Atualizar o formulário com a nova capa
       setLivro({ ...livro, capa_url: data.publicUrl });
 
     } catch (error: any) {
       setErro("Erro no upload da foto: " + error.message);
     } finally {
       setUploadingFoto(false);
-      // Limpar o input para permitir selecionar a mesma imagem novamente se necessário
       e.target.value = "";
     }
   };
@@ -119,11 +253,15 @@ export default function CadastrarLivro() {
     setErro("");
     setSucesso(false);
 
+    const termoLimpo = termoBusca.replace(/[-\s]/g, "");
+    const eIsbn = /^(978|979)?\d{9}[\dX]$/i.test(termoLimpo);
+    const isbnFinal = eIsbn ? termoLimpo : ""; 
+
     try {
       const { error } = await supabase
         .from('livros')
         .insert([{ 
-          isbn: isbn, 
+          isbn: isbnFinal, 
           titulo: livro.titulo, 
           autor: livro.autor, 
           capa_url: livro.capa_url,
@@ -134,7 +272,7 @@ export default function CadastrarLivro() {
       if (error) throw error;
 
       setSucesso(true);
-      setIsbn("");
+      setTermoBusca("");
       setLivro({ titulo: "", autor: "", capa_url: "", ano: "" });
       setLocalizacaoEscolhida(""); 
       
@@ -146,7 +284,7 @@ export default function CadastrarLivro() {
   };
 
   return (
-    <main className="min-h-screen bg-[#F2F2F7] p-6 pb-20">
+    <main className="min-h-screen bg-[#F2F2F7] p-6 pb-20 select-none">
       <div className="max-w-md mx-auto space-y-6">
         
         <header className="pt-8">
@@ -156,18 +294,52 @@ export default function CadastrarLivro() {
           <h1 className="text-2xl font-semibold text-black tracking-tight">Novo Livro</h1>
         </header>
 
-        <form className="bg-white rounded-2xl p-5 shadow-sm border border-zinc-100 space-y-5">
+        <form onSubmit={(e) => { e.preventDefault(); buscarLivro(); }} className="bg-white rounded-2xl p-5 shadow-sm border border-zinc-100 space-y-5">
           
           <div className="bg-[#F2F2F7] p-4 rounded-xl border border-zinc-200">
             <label className="text-[13px] font-semibold text-zinc-700 block mb-2">
-              Automação com Código de Barras (ISBN)
+              Buscar por Código (ISBN) ou Nome
             </label>
             <div className="flex gap-2">
-              <input type="text" value={isbn} onChange={(e) => setIsbn(e.target.value)} className="w-full bg-white rounded-lg h-10 px-3 text-[14px] outline-none border border-zinc-200 focus:border-black transition-all" placeholder="Ex: 9788580575392" />
-              <button type="button" onClick={buscarLivro} disabled={loadingBusca} className="bg-black text-white px-4 rounded-lg text-[14px] font-medium hover:bg-zinc-800 transition-colors whitespace-nowrap disabled:opacity-50">
+              <input 
+                type="text" 
+                value={termoBusca} 
+                onChange={(e) => setTermoBusca(e.target.value)} 
+                className="w-full bg-white rounded-lg h-10 px-3 text-[14px] outline-none border border-zinc-200 focus:border-black transition-all" 
+                placeholder="Ex: 97885805... ou 1984" 
+              />
+              <button 
+                type="submit" 
+                disabled={loadingBusca} 
+                className="bg-black text-white px-4 rounded-lg text-[14px] font-medium hover:bg-zinc-800 transition-colors whitespace-nowrap disabled:opacity-50"
+              >
                 {loadingBusca ? "..." : "Buscar"}
               </button>
             </div>
+
+            {resultadosBusca.length > 0 && (
+              <div className="mt-4 pt-4 border-t border-zinc-200 space-y-2 max-h-[300px] overflow-y-auto">
+                <p className="text-[12px] font-bold text-zinc-500 mb-2 uppercase tracking-wide">Escolha a Edição Correta:</p>
+                {resultadosBusca.map((edicao, index) => (
+                  <div 
+                    key={`${edicao.id}-${index}`} 
+                    onClick={() => selecionarEdicao(edicao)} 
+                    className="flex gap-3 bg-white p-2 rounded-xl border border-zinc-200 cursor-pointer hover:border-blue-500 hover:shadow-md transition-all items-center"
+                  >
+                    {edicao.capa_url ? (
+                      <img src={edicao.capa_url} alt="Capa" className="w-12 h-16 object-cover rounded shadow-sm border border-zinc-100 flex-shrink-0 pointer-events-none" />
+                    ) : (
+                      <div className="w-12 h-16 bg-zinc-100 rounded flex items-center justify-center text-[10px] text-zinc-400 text-center flex-shrink-0 border border-zinc-200">Sem Capa</div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[13px] font-bold text-black truncate">{edicao.titulo}</p>
+                      <p className="text-[12px] text-zinc-500 truncate">{edicao.autor || "Autor Desconhecido"}</p>
+                      <p className="text-[11px] text-zinc-400 mt-0.5 font-medium">{edicao.ano}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="h-px bg-zinc-100 my-4"></div>
@@ -178,7 +350,7 @@ export default function CadastrarLivro() {
           <div className="space-y-4">
             {livro.capa_url && (
               <div className="flex justify-center mb-4">
-                <img src={livro.capa_url} alt="Capa" className="h-40 rounded-xl shadow-sm object-cover border border-zinc-200" />
+                <img src={livro.capa_url} alt="Capa" className="h-40 rounded-xl shadow-sm object-cover border border-zinc-200 pointer-events-none" />
               </div>
             )}
 
@@ -197,7 +369,6 @@ export default function CadastrarLivro() {
               <input type="number" value={livro.ano} onChange={(e) => setLivro({...livro, ano: e.target.value})} className="w-full bg-[#F2F2F7] rounded-xl h-11 px-4 text-[15px] outline-none focus:ring-2 focus:ring-black/5" />
             </div>
 
-            {/* SEÇÃO DA CAPA ATUALIZADA */}
             <div className="space-y-2 mt-2 pt-2 border-t border-zinc-100">
               <label className="text-[13px] font-bold text-zinc-700 block">Capa do Livro</label>
               
@@ -230,7 +401,7 @@ export default function CadastrarLivro() {
               <select value={localizacaoEscolhida} onChange={(e) => setLocalizacaoEscolhida(e.target.value)} className="w-full bg-[#F2F2F7] rounded-xl h-11 px-4 text-[14px] outline-none focus:ring-2 focus:ring-black/5 text-zinc-700">
                 <option value="">(Sem localização definida)</option>
                 {listaLocalizacoes.map((loc) => (
-                  <option key={loc.id} value={loc.id}>{loc.comodo} - {loc.movel} ({loc.prateleira})</option>
+                  <option key={loc.id} value={loc.id}>{loc.comodo} • {loc.movel} ({loc.prateleira})</option>
                 ))}
               </select>
             </div>
